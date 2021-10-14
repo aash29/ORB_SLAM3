@@ -142,6 +142,13 @@ int main(int argc, char **argv)
   ros::Subscriber sub_img_left = n.subscribe("/camera/left/image_raw", 100, &ImageGrabber::GrabImageLeft,&igb);
   ros::Subscriber sub_img_right = n.subscribe("/camera/right/image_raw", 100, &ImageGrabber::GrabImageRight,&igb);
 
+
+  ros::Publisher pose_pub;
+  ros::Publisher map_points_pub;
+  
+  pose_pub = node_handler.advertise<geometry_msgs::PoseStamped> ("/orb_slam3_ros/camera", 1);
+  map_points_pub = node_handler.advertise<sensor_msgs::PointCloud2>("orb_slam3_ros/map_points", 1);
+
   std::thread sync_thread(&ImageGrabber::SyncWithImu,&igb);
 
   ros::spin();
@@ -267,7 +274,17 @@ void ImageGrabber::SyncWithImu()
         cv::remap(imRight,imRight,M1r,M2r,cv::INTER_LINEAR);
       }
 
-      mpSLAM->TrackStereo(imLeft,imRight,tImLeft,vImuMeas);
+
+      cv::Mat Tcw = mpSLAM->TrackStereo(imLeft,imRight,tImLeft,vImuMeas);
+
+      publish_ros_pose_tf(Tcw, current_frame_time, ORB_SLAM3::System::IMU_STEREO);
+
+      publish_ros_tracking_mappoints(mpSLAM->GetTrackedMapPoints(), current_frame_time);
+
+      //mpSLAM->TrackStereo(imLeft,imRight,tImLeft,vImuMeas);
+
+
+      
 
       std::chrono::milliseconds tSleep(1);
       std::this_thread::sleep_for(tSleep);
