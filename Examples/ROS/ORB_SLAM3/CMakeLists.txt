@@ -82,6 +82,7 @@ ${LIBS}
 # Node for stereo camera
 rosbuild_add_executable(Stereo
 src/ros_stereo.cc
+src/common.cc
 )
 
 target_link_libraries(Stereo
@@ -109,6 +110,7 @@ ${LIBS}
 # Node for stereo-inertial camera
 rosbuild_add_executable(Stereo_Inertial
 src/ros_stereo_inertial.cc
+src/common.cc
 )
 
 target_link_libraries(Stereo_Inertial

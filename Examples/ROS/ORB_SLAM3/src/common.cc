@@ -10,7 +10,7 @@ ros::Publisher pose_pub;
 ros::Publisher map_points_pub;
 image_transport::Publisher rendered_image_pub;
 
-std::string map_frame_id, pose_frame_id;
+std::string map_frame_id("world"), pose_frame_id("camera");
 
 // Coordinate transformation matrix from orb coordinate system to ros coordinate systemm
 tf::Matrix3x3 tf_orb_to_ros(1, 0, 0,

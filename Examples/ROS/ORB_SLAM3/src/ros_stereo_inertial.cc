@@ -33,6 +33,7 @@
 
 #include"../../../include/System.h"
 #include"../include/ImuTypes.h"
+#include "common.h"
 
 using namespace std;
 
@@ -146,8 +147,8 @@ int main(int argc, char **argv)
   ros::Publisher pose_pub;
   ros::Publisher map_points_pub;
   
-  pose_pub = node_handler.advertise<geometry_msgs::PoseStamped> ("/orb_slam3_ros/camera", 1);
-  map_points_pub = node_handler.advertise<sensor_msgs::PointCloud2>("orb_slam3_ros/map_points", 1);
+  pose_pub = n.advertise<geometry_msgs::PoseStamped> ("/orb_slam3_ros/camera", 1);
+  map_points_pub = n.advertise<sensor_msgs::PointCloud2>("orb_slam3_ros/map_points", 1);
 
   std::thread sync_thread(&ImageGrabber::SyncWithImu,&igb);
 
@@ -221,6 +222,7 @@ void ImageGrabber::SyncWithImu()
       this->mBufMutexRight.unlock();
 
       this->mBufMutexLeft.lock();
+      ros::Time current_frame_time = imgLeftBuf.front()->header.stamp;
       while((tImRight-tImLeft)>maxTimeDiff && imgLeftBuf.size()>1)
       {
         imgLeftBuf.pop();

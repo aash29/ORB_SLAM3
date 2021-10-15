@@ -32,6 +32,8 @@
 
 #include"../../../include/System.h"
 
+#include "common.h"
+
 using namespace std;
 
 class ImageGrabber
@@ -113,6 +115,13 @@ int main(int argc, char **argv)
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), left_sub,right_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabStereo,&igb,_1,_2));
 
+    pose_pub = nh.advertise<geometry_msgs::PoseStamped> ("/orb_slam3_ros/camera", 1);
+
+    map_points_pub = nh.advertise<sensor_msgs::PointCloud2>("orb_slam3_ros/map_points", 1);
+
+    setup_tf_orb_to_ros(ORB_SLAM3::System::STEREO);
+
+    
     ros::spin();
 
     // Stop all threads
@@ -153,17 +162,27 @@ void ImageGrabber::GrabStereo(const sensor_msgs::ImageConstPtr& msgLeft,const se
         return;
     }
 
+    cv::Mat Tcw;
+    
     if(do_rectify)
     {
         cv::Mat imLeft, imRight;
         cv::remap(cv_ptrLeft->image,imLeft,M1l,M2l,cv::INTER_LINEAR);
         cv::remap(cv_ptrRight->image,imRight,M1r,M2r,cv::INTER_LINEAR);
-        mpSLAM->TrackStereo(imLeft,imRight,cv_ptrLeft->header.stamp.toSec());
+	Tcw = mpSLAM->TrackStereo(imLeft,imRight,cv_ptrLeft->header.stamp.toSec());
+        //mpSLAM->TrackStereo(imLeft,imRight,cv_ptrLeft->header.stamp.toSec());
     }
     else
     {
-        mpSLAM->TrackStereo(cv_ptrLeft->image,cv_ptrRight->image,cv_ptrLeft->header.stamp.toSec());
+      //mpSLAM->TrackStereo(cv_ptrLeft->image,cv_ptrRight->image,cv_ptrLeft->header.stamp.toSec());
+      Tcw = mpSLAM->TrackStereo(cv_ptrLeft->image,cv_ptrRight->image,cv_ptrLeft->header.stamp.toSec());
     }
+
+    ros::Time current_frame_time = cv_ptrLeft->header.stamp;
+
+    publish_ros_pose_tf(Tcw, current_frame_time, ORB_SLAM3::System::STEREO);
+
+    publish_ros_tracking_mappoints(mpSLAM->GetTrackedMapPoints(), current_frame_time);
 
 }
 
