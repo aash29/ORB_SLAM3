@@ -34,7 +34,7 @@ extern image_transport::Publisher rendered_image_pub;
 extern std::string map_frame_id, pose_frame_id;
 
 
-void setup_ros_publishers(ros::NodeHandle &node_handler, image_transport::ImageTransport &image_transport);
+void setup_ros_publishers(ros::NodeHandle &node_handler);
 void setup_tf_orb_to_ros(ORB_SLAM3::System::eSensor);
 
 

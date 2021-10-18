@@ -5,6 +5,7 @@
 */
 
 #include "common.h"
+#include <ros/console.h>
 
 ros::Publisher pose_pub;
 ros::Publisher map_points_pub;
@@ -18,13 +19,13 @@ tf::Matrix3x3 tf_orb_to_ros(1, 0, 0,
                             0, 0, 1);
 
 
-void setup_ros_publishers(ros::NodeHandle &node_handler, image_transport::ImageTransport &image_transport)
+void setup_ros_publishers(ros::NodeHandle &node_handler)
 {
     pose_pub = node_handler.advertise<geometry_msgs::PoseStamped> ("/orb_slam3_ros/camera", 1);
 
-    map_points_pub = node_handler.advertise<sensor_msgs::PointCloud2>("orb_slam3_ros/map_points", 1);
+    map_points_pub = node_handler.advertise<sensor_msgs::PointCloud2>("/orb_slam3_ros/map_points", 1);
 
-    rendered_image_pub = image_transport.advertise("orb_slam3_ros/tracking_image", 1);
+    //rendered_image_pub = image_transport.advertise("/orb_slam3_ros/tracking_image", 1);
 }
 
 void publish_ros_pose_tf(cv::Mat Tcw, ros::Time current_frame_time, ORB_SLAM3::System::eSensor sensor_type)
@@ -36,6 +37,8 @@ void publish_ros_pose_tf(cv::Mat Tcw, ros::Time current_frame_time, ORB_SLAM3::S
         publish_tf_transform(tf_transform, current_frame_time);
 
         publish_pose_stamped(tf_transform, current_frame_time);
+
+	//ROS_INFO_STREAM("Tf" << tf_transform);
     }
 }
 

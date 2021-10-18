@@ -35,6 +35,9 @@
 #include"../include/ImuTypes.h"
 #include "common.h"
 
+#include <ros/console.h>
+
+
 using namespace std;
 
 class ImuGrabber
@@ -75,7 +78,7 @@ public:
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "Stereo_Inertial");
-  ros::NodeHandle n("~");
+  ros::NodeHandle n;
   ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
   bool bEqual = false;
   if(argc < 4 || argc > 5)
@@ -148,7 +151,13 @@ int main(int argc, char **argv)
   ros::Publisher map_points_pub;
   
   pose_pub = n.advertise<geometry_msgs::PoseStamped> ("/orb_slam3_ros/camera", 1);
-  map_points_pub = n.advertise<sensor_msgs::PointCloud2>("orb_slam3_ros/map_points", 1);
+  map_points_pub = n.advertise<sensor_msgs::PointCloud2>("/orb_slam3_ros/map_points", 1);
+
+  setup_ros_publishers(n);
+  setup_tf_orb_to_ros(ORB_SLAM3::System::IMU_STEREO);
+
+
+  
 
   std::thread sync_thread(&ImageGrabber::SyncWithImu,&igb);
 
@@ -276,8 +285,12 @@ void ImageGrabber::SyncWithImu()
         cv::remap(imRight,imRight,M1r,M2r,cv::INTER_LINEAR);
       }
 
-
+      
       cv::Mat Tcw = mpSLAM->TrackStereo(imLeft,imRight,tImLeft,vImuMeas);
+
+
+      //ROS_INFO_STREAM("TCW" << Tcw);
+
 
       publish_ros_pose_tf(Tcw, current_frame_time, ORB_SLAM3::System::IMU_STEREO);
 
