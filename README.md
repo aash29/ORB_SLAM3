@@ -43,6 +43,8 @@ chmod +x build.sh
 ./build.sh
 ```
 
+**У меня на слабых компах make зависал, и приходилось править make j 4 на make j 1**
+
 This will create **libORB_SLAM3.so**  at *lib* folder and the executables in *Examples* folder.
 
 
