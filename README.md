@@ -70,6 +70,9 @@ and add at the end the following line. Replace PATH by the folder where you clon
   ./build_ros.sh
   ```
   
+  пример файла настроек есть в файле rs.yaml и в папке  Examples.
+  
+  
 ### Running Monocular Node
 For a monocular input from topic `/camera/image_raw` run node ORB_SLAM3/Mono. You will need to provide the vocabulary file and a settings file. See the monocular examples above.
 
